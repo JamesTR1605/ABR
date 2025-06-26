@@ -364,3 +364,165 @@ public:
             cout << "Persona no encontrada." << endl;
         }
     }
+// Mostrar posibles padres disponibles
+    void mostrarPosiblesPadres() {
+        cout << "\n=== POSIBLES PADRES DISPONIBLES ===" << endl;
+        mostrarPosiblesPadresRecursivo(raiz);
+    }
+    
+    void mostrarPosiblesPadresRecursivo(Persona* nodo) {
+        if (nodo != NULL) {
+            mostrarPosiblesPadresRecursivo(nodo->izquierda);
+            cout << "ID: " << nodo->id << " - " << nodo->nombreCompleto 
+                 << " (" << (nodo->sexo == 'M' ? "Masculino" : "Femenino") << ")"
+                 << " - Estado Civil: " << nodo->estadoCivil << endl;
+            mostrarPosiblesPadresRecursivo(nodo->derecha);
+        }
+    }
+    
+    // Recorridos del árbol
+    void mostrarInorden() {
+        cout << "\n=== ÁRBOL GENEALOGICO (INORDEN) ===" << endl;
+        inordenRecursivo(raiz);
+    }
+    
+    void mostrarPreorden() {
+        cout << "\n=== ÁRBOL GENEALOGICO (PREORDEN) ===" << endl;
+        preordenRecursivo(raiz);
+    }
+    
+    void mostrarPostorden() {
+        cout << "\n=== ÁRBOL GENEALOGICO (POSTORDEN) ===" << endl;
+        postordenRecursivo(raiz);
+    }
+    
+    // Recorrido por niveles (BFS)
+    void mostrarPorNiveles() {
+        if (raiz == NULL) return;
+        
+        cout << "\n=== ARBOL GENEALOGICO (POR NIVELES) ===" << endl;
+        
+        Persona* cola[1000];
+        int frente = 0, final = 0;
+        int nivelActual = 0;
+        
+        cola[final++] = raiz;
+        cola[final++] = NULL;
+        
+        while (frente < final) {
+            Persona* actual = cola[frente++];
+            
+            if (actual == NULL) {
+                nivelActual++;
+                if (frente < final && cola[frente] != NULL) {
+                    cola[final++] = NULL;
+                }
+                cout << "\nGeneracion " << nivelActual << ":\n";
+                continue;
+            }
+            
+            cout << "  ID: " << actual->id << " - " << actual->nombreCompleto 
+                 << " (" << actual->sexo << ") - " << actual->estadoCivil;
+            
+            if (actual->padre != NULL || actual->madre != NULL) {
+                cout << " [Padres: ";
+                if (actual->padre != NULL) cout << "P:" << actual->padre->nombreCompleto;
+                if (actual->padre != NULL && actual->madre != NULL) cout << ", ";
+                if (actual->madre != NULL) cout << "M:" << actual->madre->nombreCompleto;
+                cout << "]";
+            }
+            cout << endl;
+            
+            if (actual->izquierda != NULL) {
+                cola[final++] = actual->izquierda;
+            }
+            if (actual->derecha != NULL) {
+                cola[final++] = actual->derecha;
+            }
+        }
+    }
+    
+    // Buscar ancestros de una persona
+    void buscarAncestros(int id) {
+        Persona* persona = buscarPersona(id);
+        if (persona != NULL) {
+            cout << "\n=== ANCESTROS DE " << persona->nombreCompleto << " ===" << endl;
+            
+            if (persona->padre != NULL) {
+                cout << "Padre: " << persona->padre->nombreCompleto << " (ID: " << persona->padre->id << ")" << endl;
+            }
+            if (persona->madre != NULL) {
+                cout << "Madre: " << persona->madre->nombreCompleto << " (ID: " << persona->madre->id << ")" << endl;
+            }
+            
+            if (persona->padre == NULL && persona->madre == NULL) {
+                cout << "No se han registrado ancestros directos." << endl;
+            }
+        } else {
+            cout << "Persona no encontrada." << endl;
+        }
+    }
+    
+    // Mostrar árbol genealógico por generaciones
+    void mostrarPorGeneraciones() {
+        cout << "\n=== ARBOL POR GENERACIONES ===" << endl;
+        
+        Persona* dios = buscarPersona(0);
+        if (dios != NULL) {
+            cout << "ENTIDAD SUPREMA:" << endl;
+            cout << "  ID 0: " << dios->nombreCompleto << " (" << dios->sexo << ") - " << dios->estadoCivil << endl;
+        }
+        
+        cout << "\n ABUELOS (Generación 1):" << endl;
+        for (int i = 1; i <= 4; i++) {
+            Persona* p = buscarPersona(i);
+            if (p != NULL) {
+                cout << "  ID " << i << ": " << p->nombreCompleto << " (" << p->sexo << ") - " << p->estadoCivil << endl;
+            }
+        }
+        
+        cout << "\nDESCENDIENTES:" << endl;
+        mostrarDescendientesRecursivo(raiz, 2);
+    }
+    
+    void mostrarDescendientesRecursivo(Persona* nodo, int generacion) {
+        if (nodo != NULL) {
+            mostrarDescendientesRecursivo(nodo->izquierda, generacion);
+            
+            if (nodo->id > 4) {
+                cout << "  Generacion " << generacion << " - ID " << nodo->id << ": " 
+                     << nodo->nombreCompleto << " (" << nodo->sexo << ") - " << nodo->estadoCivil;
+                if (nodo->padre != NULL || nodo->madre != NULL) {
+                    cout << " [Hijo de: ";
+                    if (nodo->padre != NULL) cout << nodo->padre->nombreCompleto;
+                    if (nodo->padre != NULL && nodo->madre != NULL) cout << " y ";
+                    if (nodo->madre != NULL) cout << nodo->madre->nombreCompleto;
+                    cout << "]";
+                }
+                cout << endl;
+            }
+            
+            mostrarDescendientesRecursivo(nodo->derecha, generacion);
+        }
+    }
+};
+
+// Función para mostrar el menú
+void mostrarMenu() {
+    cout << "\n=== SISTEMA DE ARBOL GENEALOGICO ===" << endl;
+    cout << "0. Crear entidad suprema 'Dios' (Raiz principal)" << endl;
+    cout << "1. Crear Abuelo " << endl;
+    cout << "2. Agregar persona (descendiente)" << endl;
+    cout << "3. Buscar persona" << endl;
+    cout << "4. Eliminar persona" << endl;
+    cout << "5. Mostrar informacion de persona" << endl;
+    cout << "6. Mostrar posibles padres disponibles" << endl;
+    cout << "7. Mostrar arbol (inorden)" << endl;
+    cout << "8. Mostrar arbol (preorden)" << endl;
+    cout << "9. Mostrar arbol (postorden)" << endl;
+    cout << "10. Mostrar arbol (por niveles)" << endl;
+    cout << "11. Buscar ancestros" << endl;
+    cout << "12. Mostrar por generaciones" << endl;
+    cout << "99. Salir" << endl;
+    cout << "Seleccione una opcion: ";
+}
