@@ -526,3 +526,163 @@ void mostrarMenu() {
     cout << "99. Salir" << endl;
     cout << "Seleccione una opcion: ";
 }
+int main() {
+    ArbolGenealogico arbol;
+    int opcion;
+    
+    cout << "=== BIENVENIDO AL SISTEMA DE ARBOL GENEALOGICO ===" << endl;
+    cout << "IMPORTANTE: " << endl;
+    cout << "1. Primero debe crear la entidad suprema 'Dios' (ID 0) como raiz principal" << endl;
+    cout << "2. Luego crear los 4 Abuelos como descendientes de la entidad suprema" << endl;
+    cout << "3. Finalmente podrá agregar los demás descendientes" << endl;
+    
+    do {
+        mostrarMenu();
+        cin >> opcion;
+        
+        switch (opcion) {
+            case 0: {
+                cout << "\n=== CREAR ENTIDAD SUPREMA 'DIOS' ===" << endl;
+                arbol.crearDios();
+                break;
+            }
+            case 1: {
+                cout << "\n=== CREAR TATARABUELO ===" << endl;
+                cout << "Tatarabuelos disponibles:" << endl;
+                cout << "ID 1: Primer Abuelo" << endl;
+                cout << "ID 2: Segunda Abuelo" << endl;
+                cout << "ID 3: Tercer Abuelo" << endl;
+                cout << "ID 4: Cuarta Abuelo" << endl;
+                
+                int idTatarabuelo;
+                cout << "Ingrese ID del Abuelo a crear: ";
+                cin >> idTatarabuelo;
+                
+                arbol.crearTatarabuelo(idTatarabuelo);
+                break;
+            }
+            case 2: {
+                if (!arbol.verificarDios()) {
+                    cout << "Error: Primero debe crear la entidad suprema 'Dios'." << endl;
+                    break;
+                }
+                
+                if (!arbol.verificarTatarabuelos()) {
+                    cout << "Error: Primero debe crear los 4 Abuelo." << endl;
+                    break;
+                }
+                
+                int id, idPadre, idMadre;
+                string nombre, fecha, estadoCivil;
+                char sexo;
+                
+                cout << "\n=== AGREGAR DESCENDIENTE ===" << endl;
+                cout << "Ingrese ID (mayor a 4): ";
+                cin >> id;
+                
+                if (id <= 4) {
+                    cout << "Error: Los ID 0-4 estan reservados para la entidad suprema y tatarabuelos." << endl;
+                    break;
+                }
+                
+                cin.ignore();
+                
+                if (arbol.buscarPersona(id) != NULL) {
+                    cout << "Error: Ya existe una persona con ID " << id << endl;
+                    break;
+                }
+                
+                cout << "Ingrese nombre completo: ";
+                getline(cin, nombre);
+                cout << "Ingrese fecha de nacimiento (DD/MM/AAAA): ";
+                getline(cin, fecha);
+                cout << "Ingrese sexo (M/F): ";
+                cin >> sexo;
+                cin.ignore();
+                cout << "Ingrese estado civil (Soltero/Casado/Viudo/Divorciado): ";
+                getline(cin, estadoCivil);
+                
+                cout << "\n¿Desea ver los posibles padres disponibles? (S/N): ";
+                char ver;
+                cin >> ver;
+                if (ver == 'S' || ver == 's') {
+                    arbol.mostrarPosiblesPadres();
+                }
+                
+                cout << "\nIngrese ID del padre (0 si no tiene padre registrado): ";
+                cin >> idPadre;
+                cout << "Ingrese ID de la madre (0 si no tiene madre registrada): ";
+                cin >> idMadre;
+                
+                arbol.insertarPersonaConPadres(id, nombre, fecha, sexo, estadoCivil, idPadre, idMadre);
+                break;
+            }
+            case 3: {
+                int id;
+                cout << "Ingrese ID a buscar: ";
+                cin >> id;
+                
+                Persona* persona = arbol.buscarPersona(id);
+                if (persona != NULL) {
+                    cout << "Persona encontrada: " << persona->nombreCompleto << endl;
+                } else {
+                    cout << "Persona no encontrada." << endl;
+                }
+                break;
+            }
+            case 4: {
+                int id;
+                cout << "Ingrese ID a eliminar: ";
+                cin >> id;
+                arbol.eliminarPersona(id);
+                break;
+            }
+            case 5: {
+                int id;
+                cout << "Ingrese ID de la persona: ";
+                cin >> id;
+                arbol.mostrarInfoPersona(id);
+                break;
+            }
+            case 6:
+                arbol.mostrarPosiblesPadres();
+                break;
+            case 7:
+                arbol.mostrarInorden();
+                break;
+            case 8:
+                arbol.mostrarPreorden();
+                break;
+            case 9:
+                arbol.mostrarPostorden();
+                break;
+            case 10:
+                arbol.mostrarPorNiveles();
+                break;
+            case 11: {
+                int id;
+                cout << "Ingrese ID de la persona: ";
+                cin >> id;
+                arbol.buscarAncestros(id);
+                break;
+            }
+            case 12:
+                arbol.mostrarPorGeneraciones();
+                break;
+            case 99:
+                cout << "¡Gracias por usar el sistema!" << endl;
+                break;
+            default:
+                cout << "Opcion no valida." << endl;
+        }
+        
+        if (opcion != 99) {
+            cout << "\nPresione Enter para continuar...";
+            cin.ignore();
+            cin.get();
+        }
+        
+    } while (opcion != 99);
+    
+    return 0;
+}
