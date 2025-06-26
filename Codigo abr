@@ -1,0 +1,181 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Estructura para representar una persona en el árbol genealógico
+struct Persona {
+    int id;
+    string nombreCompleto;
+    string fechaNacimiento;
+    char sexo; // 'M' o 'F'
+    string estadoCivil;
+    
+    // Punteros para el árbol binario de búsqueda
+    Persona* izquierda;
+    Persona* derecha;
+    
+    // Referencias familiares adicionales
+    Persona* padre;
+    Persona* madre;
+    Persona* hijos[10]; // Array simple en lugar de vector
+    int numHijos;
+    
+    // Constructor
+    Persona(int _id, string _nombre, string _fecha, char _sexo, string _estadoCivil = "Soltero") {
+        id = _id;
+        nombreCompleto = _nombre;
+        fechaNacimiento = _fecha;
+        sexo = _sexo;
+        estadoCivil = _estadoCivil;
+        izquierda = NULL;
+        derecha = NULL;
+        padre = NULL;
+        madre = NULL;
+        numHijos = 0;
+        for(int i = 0; i < 10; i++) {
+            hijos[i] = NULL;
+        }
+    }
+};
+
+class ArbolGenealogico {
+private:
+    Persona* raiz;
+    bool diosCreado;
+    bool tatarabuelosCreados;
+    
+    // Función auxiliar para insertar recursivamente
+    Persona* insertarRecursivo(Persona* nodo, Persona* nuevaPersona) {
+        if (nodo == NULL) {
+            return nuevaPersona;
+        }
+        
+        if (nuevaPersona->id < nodo->id) {
+            nodo->izquierda = insertarRecursivo(nodo->izquierda, nuevaPersona);
+        } else if (nuevaPersona->id > nodo->id) {
+            nodo->derecha = insertarRecursivo(nodo->derecha, nuevaPersona);
+        }
+        
+        return nodo;
+    }
+    
+    // Función auxiliar para buscar una persona
+    Persona* buscarRecursivo(Persona* nodo, int id) {
+        if (nodo == NULL || nodo->id == id) {
+            return nodo;
+        }
+        
+        if (id < nodo->id) {
+            return buscarRecursivo(nodo->izquierda, id);
+        }
+        return buscarRecursivo(nodo->derecha, id);
+    }
+    
+    // Recorrido inorden (izquierda, raíz, derecha)
+    void inordenRecursivo(Persona* nodo) {
+        if (nodo != NULL) {
+            inordenRecursivo(nodo->izquierda);
+            cout << "ID: " << nodo->id << " - " << nodo->nombreCompleto 
+                 << " (" << nodo->sexo << ") - " << nodo->fechaNacimiento
+                 << " - Estado Civil: " << nodo->estadoCivil;
+            
+            if (nodo->padre != NULL || nodo->madre != NULL) {
+                cout << " [Padres: ";
+                if (nodo->padre != NULL) cout << "P:" << nodo->padre->nombreCompleto;
+                if (nodo->padre != NULL && nodo->madre != NULL) cout << ", ";
+                if (nodo->madre != NULL) cout << "M:" << nodo->madre->nombreCompleto;
+                cout << "]";
+            }
+            cout << endl;
+            inordenRecursivo(nodo->derecha);
+        }
+    }
+    
+    // Recorrido preorden (raíz, izquierda, derecha)
+    void preordenRecursivo(Persona* nodo) {
+        if (nodo != NULL) {
+            cout << "ID: " << nodo->id << " - " << nodo->nombreCompleto 
+                 << " (" << nodo->sexo << ") - " << nodo->fechaNacimiento
+                 << " - Estado Civil: " << nodo->estadoCivil;
+            
+            if (nodo->padre != NULL || nodo->madre != NULL) {
+                cout << " [Padres: ";
+                if (nodo->padre != NULL) cout << "P:" << nodo->padre->nombreCompleto;
+                if (nodo->padre != NULL && nodo->madre != NULL) cout << ", ";
+                if (nodo->madre != NULL) cout << "M:" << nodo->madre->nombreCompleto;
+                cout << "]";
+            }
+            cout << endl;
+            preordenRecursivo(nodo->izquierda);
+            preordenRecursivo(nodo->derecha);
+        }
+    }
+    
+    // Recorrido postorden (izquierda, derecha, raíz)
+    void postordenRecursivo(Persona* nodo) {
+        if (nodo != NULL) {
+            postordenRecursivo(nodo->izquierda);
+            postordenRecursivo(nodo->derecha);
+            cout << "ID: " << nodo->id << " - " << nodo->nombreCompleto 
+                 << " (" << nodo->sexo << ") - " << nodo->fechaNacimiento
+                 << " - Estado Civil: " << nodo->estadoCivil;
+            
+            if (nodo->padre != NULL || nodo->madre != NULL) {
+                cout << " [Padres: ";
+                if (nodo->padre != NULL) cout << "P:" << nodo->padre->nombreCompleto;
+                if (nodo->padre != NULL && nodo->madre != NULL) cout << ", ";
+                if (nodo->madre != NULL) cout << "M:" << nodo->madre->nombreCompleto;
+                cout << "]";
+            }
+            cout << endl;
+        }
+    }
+    
+    // Encontrar el nodo con valor mínimo (para eliminación)
+    Persona* encontrarMinimo(Persona* nodo) {
+        while (nodo->izquierda != NULL) {
+            nodo = nodo->izquierda;
+        }
+        return nodo;
+    }
+    
+    // Función auxiliar para eliminar un nodo
+    Persona* eliminarRecursivo(Persona* nodo, int id) {
+        if (nodo == NULL) {
+            return nodo;
+        }
+        
+        if (id < nodo->id) {
+            nodo->izquierda = eliminarRecursivo(nodo->izquierda, id);
+        } else if (id > nodo->id) {
+            nodo->derecha = eliminarRecursivo(nodo->derecha, id);
+        } else {
+            // Verificar si es Dios o uno de los Abuelo 
+            if (id >= 0 && id <= 4) {
+                cout << "Error: No se pueden eliminar la entidad suprema o los Abuelo fundadores ." << endl;
+                return nodo;
+            }
+            
+            // Nodo a eliminar encontrado
+            if (nodo->izquierda == NULL) {
+                Persona* temp = nodo->derecha;
+                delete nodo;
+                return temp;
+            } else if (nodo->derecha == NULL) {
+                Persona* temp = nodo->izquierda;
+                delete nodo;
+                return temp;
+            }
+            
+            // Nodo con dos hijos: obtener sucesor inorden
+            Persona* temp = encontrarMinimo(nodo->derecha);
+            nodo->id = temp->id;
+            nodo->nombreCompleto = temp->nombreCompleto;
+            nodo->fechaNacimiento = temp->fechaNacimiento;
+            nodo->sexo = temp->sexo;
+            nodo->estadoCivil = temp->estadoCivil;
+            
+            nodo->derecha = eliminarRecursivo(nodo->derecha, temp->id);
+        }
+        return nodo;
+    }
